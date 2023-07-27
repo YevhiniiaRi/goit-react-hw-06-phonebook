@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './Contacts.module.css';
+import { useSelector } from 'react-redux';
 
 const ContactItem = ({ id, name, number, onDeleteContact }) => (
   <li key={id} className={styles.contactRender}>
@@ -13,28 +14,30 @@ const ContactItem = ({ id, name, number, onDeleteContact }) => (
   </li>
 );
 
-const Contacts = ({ contacts, onDeleteContact }) => (
-  <ul>
-    {contacts.map(contact => (
-      <ContactItem
-        key={contact.id}
-        id={contact.id}
-        name={contact.name}
-        number={contact.number}
-        onDeleteContact={onDeleteContact}
-      />
-    ))}
-  </ul>
-);
+const Contacts = ({ onDeleteContact }) => {
+  const filteredContacts = useSelector(state => {
+    const { contacts, filter } = state;
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  });
+
+  return (
+    <ul>
+      {filteredContacts.map(contact => (
+        <ContactItem
+          key={contact.id}
+          id={contact.id}
+          name={contact.name}
+          number={contact.number}
+          onDeleteContact={onDeleteContact}
+        />
+      ))}
+    </ul>
+  );
+};
 
 Contacts.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ).isRequired,
   onDeleteContact: PropTypes.func.isRequired,
 };
 

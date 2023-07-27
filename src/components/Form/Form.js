@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Form.module.css';
+import { useDispatch } from 'react-redux';
+import { addContact } from '../../store';
 
 const Form = ({ onAddContact }) => {
+  const dispatch = useDispatch();
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
@@ -20,7 +23,7 @@ const Form = ({ onAddContact }) => {
     if (name.trim() === '') {
       return;
     }
-    onAddContact(name, number);
+    dispatch(addContact({ name, number }));
     setName('');
     setNumber('');
   };

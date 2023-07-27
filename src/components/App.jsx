@@ -1,33 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { nanoid } from '@reduxjs/toolkit';
 import Contacts from './Contacts/Contacts';
-import { nanoid } from 'nanoid';
 import Form from './Form/Form';
 import Filter from './Filter/Filter';
+import { addContact, deleteContact, updateFilter } from '../store';
 
 const App = () => {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const storedContacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(storedContacts);
-    if (parsedContacts) {
-      setContacts(parsedContacts);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  
-  const deleteContact = contactId => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== contactId)
-    );
-  };
-
-  const addContact = (name, number) => {
+  const handleAddContact = (name, number) => {
     const isNameExists = contacts.some(contact => contact.name === name);
 
     if (isNameExists) {
@@ -39,13 +23,17 @@ const App = () => {
         number: number,
       };
 
-      setContacts(prevContacts => [...prevContacts, newContact]);
+      dispatch(addContact(newContact));
     }
+  };
+
+  const handleDeleteContact = contactId => {
+    dispatch(deleteContact(contactId));
   };
 
   const handleFilterChange = event => {
     const { value } = event.target;
-    setFilter(value);
+    dispatch(updateFilter(value));
   };
 
   const getFilteredContacts = () => {
@@ -60,13 +48,16 @@ const App = () => {
     <>
       <h1>Phonebook</h1>
 
-      <Form onAddContact={addContact} />
+      <Form onAddContact={handleAddContact} />
 
       <h2>Contacts</h2>
       <Filter value={filter} onChange={handleFilterChange} />
 
       {contacts.length > 0 ? (
-        <Contacts contacts={filteredContacts} onDeleteContact={deleteContact} />
+        <Contacts
+          contacts={filteredContacts}
+          onDeleteContact={handleDeleteContact}
+        />
       ) : (
         <p>No contacts available.</p>
       )}
